@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(cxx_template_project VERSION 0.3.0)
+project(cxx_template_project VERSION 0.0.1)
 
 # for correct library locations across platforms
 include(GNUInstallDirs)

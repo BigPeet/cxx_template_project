@@ -120,7 +120,7 @@ Checks:
 # clang-analyzer checks are not always reliable.
 WarningsAsErrors: '*,-clang-analyzer-*'
 
-HeaderFilterRegex: '(app|lib)/*'
+HeaderFilterRegex: '(app|lib)/'
 FormatStyle: file
 
 CheckOptions:

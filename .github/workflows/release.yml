@@ -39,6 +39,7 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "install-dir=${{ github.workspace }}/bin" >> "$GITHUB_OUTPUT"
+        echo "app-binary=cxx_template_project" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -64,17 +65,17 @@ jobs:
       run: |
           if ($env:RUNNER_OS -eq "Windows") {
             ls
-            7z a cxx_template_project-${{ matrix.os }}.zip cxx_template_project.exe
+            7z a ${{ steps.strings.outputs.app-binary }}-${{ matrix.os }}.zip ${{ steps.strings.outputs.app-binary }}.exe
           }
           else {
-            zip cxx_template_project-${{ matrix.os }}.zip cxx_template_project
+            zip ${{ steps.strings.outputs.app-binary }}-${{ matrix.os }}.zip ${{ steps.strings.outputs.app-binary }}
           }
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: cxx_template_project-${{ matrix.os }}
-        path: ${{ steps.strings.outputs.install-dir }}/cxx_template_project-${{ matrix.os }}.zip
+        name: ${{ steps.strings.outputs.app-binary }}-${{ matrix.os }}
+        path: ${{ steps.strings.outputs.install-dir }}/${{ steps.strings.outputs.app-binary }}-${{ matrix.os }}.zip
         retention-days: 7
 
   release:
@@ -87,7 +88,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: binaries
-        pattern: cxx_template_project-*
+        pattern: ${{ steps.strings.outputs.app-binary }}-*
         merge-multiple: true
     - name: Release
       uses: softprops/action-gh-release@v2

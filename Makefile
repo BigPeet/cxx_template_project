@@ -59,14 +59,14 @@ clean:
 	@if [ -f a.out ]; then rm a.out; fi
 
 check-format:
-	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format --dry-run -Werror
+	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format-18 --dry-run -Werror
 	@echo "SUCCESS: No formatting errors found."
 
 format:
-	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format -i
+	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format-18 -i
 
 lint: build/compile_commands.json
-	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy -quiet -p build/ -use-color 1
+	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy-18 -quiet -p build/ -use-color 1
 
 fixes: build/compile_commands.json
-	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy -quiet -p build/ -use-color 1 -fix
+	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy-18 -quiet -p build/ -use-color 1 -fix

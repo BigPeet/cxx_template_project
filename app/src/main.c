@@ -1,8 +1,7 @@
 #include "app/config.h"
 #include "greet/greet.h"
 
-int main(void)
-{
+int main(void) {
     greet(PROJECT_NAME);
     return VERSION_MAJOR;
 }

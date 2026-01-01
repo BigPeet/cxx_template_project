@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 
-
-void greet(char const* name)
-{
+void greet(char const* name) {
     printf("Greetings, %s\n", name);
 }

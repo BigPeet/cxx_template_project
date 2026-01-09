@@ -13,9 +13,22 @@ else
 	COMPILER := "clang"
 endif
 
-BUILD_TYPE := "Release"
+# Default build type
+BUILD_TYPE ?= "Release"
 
-ARGS ?= # only set if not specified in environment
+# Default build and source directories
+BUILD_DIR ?= build
+APP_DIR ?= app
+LIB_DIR ?= lib
+TEST_DIR ?= tests
+BINDINGS_DIR ?=
+
+# Default clang-format/-tidy binaries/wrappers
+CLANG_FORMAT ?= clang-format-18
+CLANG_TIDY ?= run-clang-tidy-18
+
+# Arguments for running executable
+ARGS ?=
 
 # If CC is not specified, it will be populated by make to "cc".
 # In that case, I want to use "clang" (if available) instead.
@@ -23,56 +36,110 @@ ARGS ?= # only set if not specified in environment
 CC := $(or $(filter-out cc,$(CC)),$(COMPILER))
 CXX := $(or $(filter-out cc,$(CC)),$(COMPILER))
 
-.PHONY: all enable-debug debug release configure build install clean check-format format lint
+# Find all CMake files (except those in build dir)
+CMAKE_FILES = $(shell find . \
+  -path ./$(BUILD_DIR) -prune -o \
+  \( -name CMakeLists.txt -o -name "*.cmake" \) -print)
 
-BINS := build/app/cxx_template_project
+# Find all source files
+SRC_FILES = $(shell find $(APP_DIR) $(LIB_DIR) $(BINDINGS_DIR) -name "*.c" -o -name "*.cpp" -o -name "*.cc")
+HEADER_FILES = $(shell find $(APP_DIR) $(LIB_DIR) $(BINDINGS_DIR) -name "*.h" -o -name "*.hpp")
+TEST_SRC_FILES = $(shell find $(TEST_DIR) -name "*.c" -o -name "*.cpp" -o -name "*.cc")
+TEST_HEADER_FILES = $(shell find $(TEST_DIR) -name "*.h" -o -name "*.hpp")
 
-all: $(BINS)
+# Stamp file to indicate when configuration was done
+CONFIGURED := $(BUILD_DIR)/CMakeFiles/cmake.check_cache
 
-$(BINS): build
+# Setup binary targets
+EXE := cxx_template_project
+LIB := libgreet.a
+BINDINGS :=
 
-debug: enable-debug configure $(BINS)
+.PHONY: build
+build: $(CONFIGURED)
+	@cmake --build $(BUILD_DIR) --parallel
 
-enable-debug:
-	$(eval BUILD_TYPE := "Debug")
-
-release: all
-
-.PHONY: run
-run: $(BINS)
-	./$(BINS) $(ARGS)
-
-configure:
-	@cmake -S . -B build/ -G $(GENERATOR) \
+$(CONFIGURED): $(CMAKE_FILES)
+	@echo "Configuring project in $(BUILD_DIR) with $(GENERATOR) using CC=$(CC) CXX=$(CXX) and BUILD_TYPE=$(BUILD_TYPE)"
+	@cmake -S . -B $(BUILD_DIR) -G $(GENERATOR) \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 
-# technically, CMakeCache.txt or build.ninja would be a better indicator...
-build/compile_commands.json: configure
-
-build: build/compile_commands.json
-	@cmake --build build/ --parallel
-
-$(INSTALL_FILE): configure
-
+.PHONY: install
 install: $(BINS)
-	@cmake --install build/
+	@cmake --install $(BUILD_DIR)
 
+# Various (sub)sets of build targets
+.PHONY: all
+all: build bindings
+
+.PHONY: app
+app: $(CONFIGURED)
+	@cmake --build build/ --target $(EXE) --parallel
+
+.PHONY: lib
+lib: $(CONFIGURED)
+	@cmake --build build/ --target $(LIB) --parallel
+
+.PHONY: bindings
+bindings: $(CONFIGURED)
+	@if [ -n "$(BINDINGS)" ]; then \
+		cmake --build $(BUILD_DIR) --target $(BINDINGS) --parallel; \
+	fi
+
+.PHONY: run
+run: $(BINS)
+	./$(BUILD_DIR)/app/$(EXE) $(ARGS)
+
+# Configuration specific targets
+.PHONY: configure
+configure:
+	@BUILD_TYPE=$(BUILD_TYPE) $(MAKE) --no-print-directory -B $(CONFIGURED)
+
+.PHONY: debug
+debug: enable-debug configure app lib
+
+.PHONY: enable-debug
+enable-debug:
+	$(eval BUILD_TYPE := "Debug")
+
+.PHONY: enable-release
+enable-release:
+	$(eval BUILD_TYPE := "Release")
+
+.PHONY: release
+release: enable-release configure all
+
+# Clean up
+.PHONY: clean
 clean:
-	@if [ -d build/ ]; then rm -rf build; fi
+	@if [ -d $(BUILD_DIR) ]; then rm -rf $(BUILD_DIR); fi
 	@if [ -d bin/ ]; then rm -rf bin; fi
 	@if [ -f a.out ]; then rm a.out; fi
 
+.PHONY: clean-build
+clean-build:
+	@cmake --build $(BUILD_DIR) --target clean
+
+# Formatting and linting
+.PHONY: check-format
 check-format:
-	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format-18 --dry-run -Werror
+	@$(CLANG_FORMAT) --dry-run -Werror $(SRC_FILES) $(HEADER_FILES) $(TEST_SRC_FILES) $(TEST_HEADER_FILES)
 	@echo "SUCCESS: No formatting errors found."
 
+.PHONY: format
 format:
-	@find lib/ app/ -name "*.c" -or -name "*.h" -or -name "*.cpp" -or -name "*.hpp" | xargs clang-format-18 -i
+	@$(CLANG_FORMAT) -i $(SRC_FILES) $(HEADER_FILES) $(TEST_SRC_FILES) $(TEST_HEADER_FILES)
 
-lint: build/compile_commands.json
-	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy-18 -quiet -p build/ -use-color 1
+.PHONY: lint
+lint: ${CONFIGURED}
+	@$(CLANG_TIDY) -quiet -p build/ -use-color 1 $(SRC_FILES)
 
-fixes: build/compile_commands.json
-	@find lib/ app/ -name "*.c" -or -name "*.cpp" | xargs run-clang-tidy-18 -quiet -p build/ -use-color 1 -fix
+.PHONY: fixes
+fixes: ${CONFIGURED}
+	@$(CLANG_TIDY) -quiet -p build/ -use-color 1 -fix $(SRC_FILES)
+
+.PHONY: test
+test: $(CONFIGURED)
+	@echo "Test target not implemented yet."

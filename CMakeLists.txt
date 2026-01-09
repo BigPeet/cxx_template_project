@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.24)
 project(cxx_template_project VERSION 0.0.1)
 
 # for correct library locations across platforms
@@ -10,6 +10,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD "17")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(DEFAULT_BUILD_TYPE "Release")
+
+# TODO: move into general option file
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})

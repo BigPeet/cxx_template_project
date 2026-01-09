@@ -15,6 +15,8 @@ endif
 
 BUILD_TYPE := "Release"
 
+ARGS ?= # only set if not specified in environment
+
 # If CC is not specified, it will be populated by make to "cc".
 # In that case, I want to use "clang" (if available) instead.
 # But if it is user-specified, keep it as-is.
@@ -35,6 +37,10 @@ enable-debug:
 	$(eval BUILD_TYPE := "Debug")
 
 release: all
+
+.PHONY: run
+run: $(BINS)
+	./$(BINS) $(ARGS)
 
 configure:
 	@cmake -S . -B build/ -G $(GENERATOR) \

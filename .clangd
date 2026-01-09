@@ -1,0 +1,16 @@
+# see https://clangd.llvm.org/config.html
+Diagnostics:
+  ClangTidy:
+    FastCheckFilter: None # variants: Strict, Loose, None
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+  Designators: false
+  BlockEnd: false
+  DefaultArguments: true
+  TypeNameLimit: 30
+Hover:
+  ShowAKA: false
+Documentation:
+  CommentFormat: Plaintext # variants: Plaintext, Markdown, Doxygen

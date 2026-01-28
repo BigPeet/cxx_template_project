@@ -2,19 +2,40 @@
 # The actual build is enabled solely by CMake.
 
 ifeq (, $(shell command -v ninja))
-	GENERATOR := "Unix Makefiles"
+	GENERATOR ?= Unix Makefiles
 else
-	GENERATOR := "Ninja"
+	GENERATOR ?= Ninja
 endif
 
-ifeq (, $(shell command -v clang))
-	COMPILER := "cc"
+# if clang is available, use it as the default compiler
+ifneq (, $(shell command -v clang))
+	COMPILER ?= clang
+else ifneq (, $(shell command -v gcc))
+	COMPILER ?= gcc
 else
-	COMPILER := "clang"
+	COMPILER ?=
 endif
+
+# If CC is not specified, it will be populated by make to "cc" (and CXX to "g++").
+# Override that only if the a specific compiler is requested.
+# To override the automatic selection, set CC and CXX directly when invoking make and leave COMPILER empty.
+ifeq (clang, $(COMPILER))
+	# compiler specified, overwrite CC and CXX
+	CC := clang
+	CXX := clang++
+else ifeq (gcc, $(COMPILER))
+	# compiler specified, overwrite CC and CXX
+	CC := gcc
+	CXX := g++
+else ifneq (, $(COMPILER))
+	# compiler specified, overwrite CC and CXX
+	CC := $(COMPILER)
+	CXX := $(COMPILER)
+endif
+
 
 # Default build type
-BUILD_TYPE ?= "Release"
+BUILD_TYPE ?= Release
 
 # Default build and source directories
 BUILD_DIR ?= build
@@ -30,11 +51,6 @@ CLANG_TIDY ?= run-clang-tidy-18
 # Arguments for running executable
 ARGS ?=
 
-# If CC is not specified, it will be populated by make to "cc".
-# In that case, I want to use "clang" (if available) instead.
-# But if it is user-specified, keep it as-is.
-CC := $(or $(filter-out cc,$(CC)),$(COMPILER))
-CXX := $(or $(filter-out cc,$(CC)),$(COMPILER))
 
 # Find all CMake files (except those in build dir)
 CMAKE_FILES = $(shell find . \
@@ -60,8 +76,8 @@ build: $(CONFIGURED)
 	@cmake --build $(BUILD_DIR) --parallel
 
 $(CONFIGURED): $(CMAKE_FILES)
-	@echo "Configuring project in $(BUILD_DIR) with $(GENERATOR) using CC=$(CC) CXX=$(CXX) and BUILD_TYPE=$(BUILD_TYPE)"
-	@cmake -S . -B $(BUILD_DIR) -G $(GENERATOR) \
+	@echo "Configuring project in $(BUILD_DIR) with '$(GENERATOR)' using CC=$(CC) CXX=$(CXX) and BUILD_TYPE=$(BUILD_TYPE)"
+	@cmake -S . -B $(BUILD_DIR) -G "$(GENERATOR)" \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
@@ -143,3 +159,44 @@ fixes: ${CONFIGURED}
 .PHONY: test
 test: $(CONFIGURED)
 	@echo "Test target not implemented yet."
+
+.PHONY: help
+help:
+	@echo "Convenience Makefile for C/C++ Project wrapping CMake"
+	@echo ""
+	@echo "Convenience targets:"
+	@echo "  build          - Configure and build the project (default target)"
+	@echo "  install        - Install the built targets"
+	@echo "  all            - Build all targets (app, lib, bindings, etc.)"
+	@echo "  app            - Build the application"
+	@echo "  lib            - Build the library"
+	@echo "  bindings       - Build the language bindings (if any)"
+	@echo "  run            - Run the built application with ARGS"
+	@echo "  configure      - Configure the project with CMake"
+	@echo "  debug          - Configure and build in Debug mode"
+	@echo "  release        - Configure and build in Release mode"
+	@echo "  clean          - Clean the build directory and binaries"
+	@echo "  clean-build    - Clean the build artifacts"
+	@echo "  check-format   - Check code formatting with clang-format"
+	@echo "  format         - Format code with clang-format"
+	@echo "  lint           - Run clang-tidy for linting"
+	@echo "  fixes          - Apply fixes suggested by clang-tidy"
+	@echo "  test           - Run tests"
+	@echo "  help           - Show this help message"
+	@echo ""
+	@echo "Variables that can be set when invoking make:"
+	@echo "  GENERATOR      - CMake generator to use (Ninja, Unix Makefiles, etc.)"
+	@echo "  BUILD_TYPE     - Build type (Debug, Release, etc.), default is 'Release'"
+	@echo "  BUILD_DIR      - Build directory, default is 'build'"
+	@echo "  APP_DIR        - Application source directory, default is 'app'"
+	@echo "  LIB_DIR        - Library source directory, default is 'lib'"
+	@echo "  TEST_DIR       - Test source directory, default is 'tests'"
+	@echo "  BINDINGS_DIR   - Language bindings source directory"
+	@echo "  ARGS           - Arguments to pass when running the application"
+	@echo "  COMPILER       - Compiler to use (clang, gcc, etc.), overrides CC and CXX if set, default is automatic selection"
+	@echo "  CC             - C compiler to use (overridden by COMPILER if set)"
+	@echo "  CXX            - C++ compiler to use (overridden by COMPILER if set)"
+	@echo "  CLANG_FORMAT   - clang-format binary or wrapper, default is clang-format-18"
+	@echo "  CLANG_TIDY     - clang-tidy binary or wrapper, default is run-clang-tidy-18"
+
+

@@ -51,6 +51,8 @@ CLANG_TIDY ?= run-clang-tidy-18
 # Arguments for running executable
 ARGS ?=
 
+# Misc. settings
+DEV_MODE ?=
 
 # Find all CMake files (except those in build dir)
 CMAKE_FILES = $(shell find . \
@@ -67,20 +69,24 @@ TEST_HEADER_FILES = $(shell find $(TEST_DIR) -name "*.h" -o -name "*.hpp")
 CONFIGURED := $(BUILD_DIR)/CMakeFiles/cmake.check_cache
 
 # Setup binary targets
-EXE := cxx_template_project
-LIB := libgreet.a
-BINDINGS :=
+APP_TARGETS := cxx_template_project
+LIB_TARGETS := libgreet.a
+BINDINGS_TARGETS :=
+
+# Determine the main executable name
+EXE := $(word 1, $(APP_TARGETS))
 
 .PHONY: build
 build: $(CONFIGURED)
 	@cmake --build $(BUILD_DIR) --parallel
 
 $(CONFIGURED): $(CMAKE_FILES)
-	@echo "Configuring project in $(BUILD_DIR) with '$(GENERATOR)' using CC=$(CC) CXX=$(CXX) and BUILD_TYPE=$(BUILD_TYPE)"
+	@echo "Configuring project in $(BUILD_DIR) with '$(GENERATOR)' using CC=$(CC), CXX=$(CXX) and BUILD_TYPE=$(BUILD_TYPE)"
 	@cmake -S . -B $(BUILD_DIR) -G "$(GENERATOR)" \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
-		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DDEV_MODE=$(DEV_MODE)
 
 .PHONY: install
 install: all
@@ -92,16 +98,16 @@ all: build bindings
 
 .PHONY: app
 app: $(CONFIGURED)
-	@cmake --build build/ --target $(EXE) --parallel
+	@cmake --build $(BUILD_DIR) --target $(APP_TARGETS) --parallel
 
 .PHONY: lib
 lib: $(CONFIGURED)
-	@cmake --build build/ --target $(LIB) --parallel
+	@cmake --build $(BUILD_DIR) --target $(LIB_TARGETS) --parallel
 
 .PHONY: bindings
 bindings: $(CONFIGURED)
-	@if [ -n "$(BINDINGS)" ]; then \
-		cmake --build $(BUILD_DIR) --target $(BINDINGS) --parallel; \
+	@if [ -n "$(BINDINGS_TARGETS)" ]; then \
+		cmake --build $(BUILD_DIR) --target $(BINDINGS_TARGETS) --parallel; \
 	fi
 
 .PHONY: run
@@ -111,21 +117,31 @@ run: app
 # Configuration specific targets
 .PHONY: configure
 configure:
-	@BUILD_TYPE=$(BUILD_TYPE) $(MAKE) --no-print-directory -B $(CONFIGURED)
+	@BUILD_TYPE=$(BUILD_TYPE) \
+		DEV_MODE=$(DEV_MODE) \
+		$(MAKE) --no-print-directory -B $(CONFIGURED)
 
 .PHONY: debug
 debug: enable-debug configure app lib
 
 .PHONY: enable-debug
 enable-debug:
-	$(eval BUILD_TYPE := "Debug")
+	$(eval BUILD_TYPE := Debug)
 
 .PHONY: enable-release
 enable-release:
-	$(eval BUILD_TYPE := "Release")
+	$(eval BUILD_TYPE := Release)
 
 .PHONY: release
 release: enable-release configure all
+
+.PHONY: enable-dev-mode
+enable-dev-mode:
+	$(eval DEV_MODE := ON)
+	$(eval BUILD_TYPE := )
+
+.PHONY: dev
+dev: enable-dev-mode configure all
 
 # Clean up
 .PHONY: clean
@@ -150,11 +166,11 @@ format:
 
 .PHONY: lint
 lint: ${CONFIGURED}
-	@$(CLANG_TIDY) -quiet -p build/ -use-color 1 $(SRC_FILES)
+	@$(CLANG_TIDY) -quiet -p $(BUILD_DIR) -use-color 1 $(SRC_FILES)
 
 .PHONY: fixes
 fixes: ${CONFIGURED}
-	@$(CLANG_TIDY) -quiet -p build/ -use-color 1 -fix $(SRC_FILES)
+	@$(CLANG_TIDY) -quiet -p $(BUILD_DIR) -use-color 1 -fix $(SRC_FILES)
 
 .PHONY: test
 test: $(CONFIGURED)
@@ -175,6 +191,7 @@ help:
 	@echo "  configure      - Configure the project with CMake"
 	@echo "  debug          - Configure and build in Debug mode"
 	@echo "  release        - Configure and build in Release mode"
+	@echo "  dev            - Configure and build in Dev mode"
 	@echo "  clean          - Clean the build directory and binaries"
 	@echo "  clean-build    - Clean the build artifacts"
 	@echo "  check-format   - Check code formatting with clang-format"

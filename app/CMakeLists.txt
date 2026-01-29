@@ -7,7 +7,12 @@ set(APP_SOURCE_FILES src/main.c)
 
 add_executable(${PROJECT_NAME} ${APP_SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE project_warnings greet)
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE
+  project_warnings
+  project_options
+  greet
+  )
 # Clarify if this is really necessary
 # target_compile_features(${PROJECT_NAME} PUBLIC c_std_99)
 

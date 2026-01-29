@@ -6,7 +6,11 @@ set (GREET_SOURCE_FILES
 
 add_library(greet STATIC ${GREET_SOURCE_FILES})
 
-target_link_libraries(greet PRIVATE project_warnings)
+target_link_libraries(greet
+  PRIVATE
+  project_warnings
+  project_options
+  )
 target_include_directories(greet PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 # Clarify if this is required
 # target_compile_features(lib_greet PUBLIC c_std_99)

@@ -7,21 +7,10 @@ include(GNUInstallDirs)
 include(cmake/PreventInSourceBuilds.cmake)
 # Populate git related variables
 include(cmake/Git.cmake)
-# Various Project options
-include(cmake/ProjectOptions.cmake)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_C_STANDARD "99")
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD "17")
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(DEFAULT_BUILD_TYPE "Release")
-
-# get the current date and set it as a variable
-string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
-
-# TODO: move into general option file
-set(CMAKE_COLOR_DIAGNOSTICS ON)
+# Various options
+include(cmake/Options.cmake)
+# Common settings
+include(cmake/CommonSettings.cmake)
 
 # Setup project options and flags
 setup_options()
@@ -36,7 +25,7 @@ include(cmake/CompilerWarnings.cmake)
 add_library(project_warnings INTERFACE)
 set_project_warnings(project_warnings WARNINGS_AS_ERRORS "" "" "" "")
 
-# Sanitizers # TODO: move into separate file
+# Sanitizers
 if(${ENABLE_SANITIZERS})
   include(cmake/Sanitizers.cmake)
   enable_sanitizers(project_options

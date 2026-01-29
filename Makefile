@@ -72,6 +72,7 @@ CONFIGURED := $(BUILD_DIR)/CMakeFiles/cmake.check_cache
 APP_TARGETS := cxx_template_project
 LIB_TARGETS := libgreet.a
 BINDINGS_TARGETS :=
+TEST_TARGETS := cxx_template_project_tests
 
 # Determine the main executable name
 EXE := $(word 1, $(APP_TARGETS))
@@ -174,7 +175,8 @@ fixes: ${CONFIGURED} ## Apply suggested code fixes
 
 .PHONY: test
 test: $(CONFIGURED) ## Run tests
-	@echo "Test target not implemented yet."
+	@cmake --build $(BUILD_DIR) --target $(TEST_TARGETS) --parallel
+	@cmake --build $(BUILD_DIR) --target test
 
 .PHONY: help
 help: ## Show this help message

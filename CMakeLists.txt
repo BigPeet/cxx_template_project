@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
-project(cxx_template_project VERSION 0.0.1)
+project(
+  cxx_template_project
+  VERSION 0.0.1
+  DESCRIPTION ""
+  LANGUAGES CXX C
+  )
 
 # for correct library locations across platforms
 include(GNUInstallDirs)
@@ -7,17 +12,19 @@ include(GNUInstallDirs)
 include(cmake/PreventInSourceBuilds.cmake)
 # Populate git related variables
 include(cmake/Git.cmake)
-# Various options
-include(cmake/Options.cmake)
 # Common settings
 include(cmake/CommonSettings.cmake)
+# Various partially project-specific options
+include(cmake/Options.cmake)
+# Dependencies
+include(cmake/Dependencies.cmake)
 
 # Setup project options and flags
 setup_options()
 print_options()
 
 # Add interface library for various options
-add_library(project_options INTERFACE)
+add_library(project_options INTERFACE) # should this be namespaced? What about regular libraries?
 set_project_options(project_options)
 
 # Add interface library for compiler warnings

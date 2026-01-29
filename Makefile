@@ -83,7 +83,7 @@ $(CONFIGURED): $(CMAKE_FILES)
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 
 .PHONY: install
-install: $(BINS)
+install: all
 	@cmake --install $(BUILD_DIR)
 
 # Various (sub)sets of build targets
@@ -105,8 +105,8 @@ bindings: $(CONFIGURED)
 	fi
 
 .PHONY: run
-run: $(BINS)
-	./$(BUILD_DIR)/app/$(EXE) $(ARGS)
+run: app
+	./$(BUILD_DIR)/$(APP_DIR)/$(EXE) $(ARGS)
 
 # Configuration specific targets
 .PHONY: configure

@@ -4,7 +4,7 @@
 
 TEST(GreetTest, Hello) {
     // expect to see "Hello, Alice!" printed to stdout
-    Person const alice = {.name = const_cast<char*>("Alice")};
+    Person const alice{const_cast<char*>("Alice")};
     testing::internal::CaptureStdout();
     greet(HELLO, &alice);
     EXPECT_EQ(testing::internal::GetCapturedStdout(), "Hello, Alice!\n");
@@ -12,7 +12,7 @@ TEST(GreetTest, Hello) {
 
 TEST(GreetTest, Goodbye) {
     // expect to see "Goodbye, Bob!" printed to stdout
-    Person const bob = {.name = const_cast<char*>("Bob")};
+    Person const bob{const_cast<char*>("Bob")};
     testing::internal::CaptureStdout();
     greet(GOODBYE, &bob);
     EXPECT_EQ(testing::internal::GetCapturedStdout(), "Goodbye, Bob!\n");

@@ -72,7 +72,9 @@ CONFIGURED := $(BUILD_DIR)/CMakeFiles/cmake.check_cache
 APP_TARGETS := cxx_template_project
 LIB_TARGETS := libgreet.a
 BINDINGS_TARGETS :=
-TEST_TARGETS := cxx_template_project_tests
+
+# For each LIB_TARGET, create a corresponding TEST_TARGET
+TEST_TARGETS := $(patsubst lib%.a, %_tests, $(LIB_TARGETS))
 
 # Determine the main executable name
 EXE := $(word 1, $(APP_TARGETS))

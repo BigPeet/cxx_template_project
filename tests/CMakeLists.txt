@@ -1,5 +1,5 @@
-add_executable(${PROJECT_NAME}_tests src/greet_test.cpp)
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::gtest_main greet)
-
 include(GoogleTest)
-gtest_discover_tests(${PROJECT_NAME}_tests)
+
+add_executable(greet_tests src/greet_test.cpp)
+target_link_libraries(greet_tests PRIVATE GTest::gtest_main greet)
+gtest_discover_tests(greet_tests)

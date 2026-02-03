@@ -7,20 +7,24 @@ on:
       - '.github/workflows/cmake-multi-platform.yml'
       - 'app/**'
       - 'lib/**'
+      - 'tests/**'
       - 'cmake/**'
       - '.clang-format'
       - '.clang-tidy'
       - 'CMakeLists.txt'
+      - 'Makefile'
   pull_request:
     branches: [ "master" ]
     paths:
       - '.github/workflows/cmake-multi-platform.yml'
       - 'app/**'
       - 'lib/**'
+      - 'tests/**'
       - 'cmake/**'
       - '.clang-format'
       - '.clang-tidy'
       - 'CMakeLists.txt'
+      - 'Makefile'
 
 jobs:
   format:

@@ -17,7 +17,7 @@ The CMake configuration is heavily based on/inspired by [Jason Turner's CMake Te
     * Warnings
     * Options
     * Dependencies
-    * Toolchains
+    * Toolchains (TODO)
 * Makefile
 * clang-tidy, clangd and clang-format configuration
 * CI workflows (Github Actions and/or Gitlab config)

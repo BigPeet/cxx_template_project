@@ -47,6 +47,9 @@ if(${ENABLE_SANITIZERS})
     )
 endif()
 
+# Dependencies
+fetch_dependencies()
+
 # Testing
 if (${ENABLE_TESTS})
   enable_testing()

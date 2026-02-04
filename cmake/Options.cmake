@@ -20,21 +20,20 @@ function(
   endif()
 endfunction()
 
-macro(set_global_options)
+function(set_global_options)
   # LTO
   if(${ENABLE_LTO})
     include(CheckIPOSupported)
     check_ipo_supported(RESULT result OUTPUT output)
     if(result)
-      message(STATUS "IPO / LTO is supported and will be enabled.")
-      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON CACHE BOOL "Enable IPO / LTO" FORCE)
     else()
       message(WARNING "IPO / LTO is not supported: ${output}")
     endif()
   endif()
 
   # set(CMAKE_LINKER_TYPE "LLD") # requires cmake 3.29
-endmacro()
+endfunction()
 
 macro(setup_options)
 

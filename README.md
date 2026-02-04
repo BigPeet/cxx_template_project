@@ -50,3 +50,26 @@ git push /my/new/repo master
 ```bash
 git clone /my/new/repo /my/new/repo_checkout
 ```
+
+## Build
+
+This project is using [cmake](https://cmake.org/).
+To build, simply run:
+
+```bash
+cmake -S . -B build
+cmake --build build
+```
+
+There are some options which can be configured (either by providing them to cmake's CLI or configuring them via some sort of TUI/GUI).
+
+For some common operations, a convenience Makefile is provided.
+
+```bash
+make release # Release build
+make run ARGS="--help" # Run "main" executable with ARGS
+
+# or
+make dev # Development build
+make test # Run tests
+```

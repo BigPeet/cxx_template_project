@@ -20,6 +20,22 @@ function(
   endif()
 endfunction()
 
+macro(set_global_options)
+  # LTO
+  if(${ENABLE_LTO})
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT output)
+    if(result)
+      message(STATUS "IPO / LTO is supported and will be enabled.")
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    else()
+      message(WARNING "IPO / LTO is not supported: ${output}")
+    endif()
+  endif()
+
+  # set(CMAKE_LINKER_TYPE "LLD") # requires cmake 3.29
+endmacro()
+
 macro(setup_options)
 
   # Dev Mode
@@ -60,8 +76,6 @@ macro(setup_options)
     option(ENABLE_LTO "Enable/Disable Link Time Optimization" OFF)
   endif()
 
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
-
   # Sanitizers
   if(MSVC)
     option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined sanitizer" OFF)
@@ -72,7 +86,5 @@ macro(setup_options)
   option(ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
   option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
   option(ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
-
-  # set(CMAKE_LINKER_TYPE "LLD") # requires cmake 3.29
 
 endmacro()

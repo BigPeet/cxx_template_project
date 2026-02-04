@@ -12,9 +12,9 @@ include(GNUInstallDirs)
 include(cmake/PreventInSourceBuilds.cmake)
 # Populate git related variables
 include(cmake/Git.cmake)
-# Common settings
-include(cmake/CommonSettings.cmake)
-# Various partially project-specific options
+# Static global settings that should not be changed by the user and apply to all targets
+include(cmake/StaticGlobalSettings.cmake)
+# Various options that can be configured by the user
 include(cmake/Options.cmake)
 # Dependencies
 include(cmake/Dependencies.cmake)
@@ -23,7 +23,10 @@ include(cmake/Dependencies.cmake)
 setup_options()
 print_options()
 
-# Add interface library for various options
+# Set global options that apply to all targets
+set_global_options()
+
+# Add interface library for project options
 add_library(project_options INTERFACE) # should this be namespaced? What about regular libraries?
 set_project_options(project_options)
 

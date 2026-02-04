@@ -55,6 +55,9 @@ macro(setup_options)
     option(LOGGING_NO_PREFIX "Log with file prefix" OFF)
   endif()
 
+  # Link Time Optimization
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${IS_RELEASE_BUILD})
+
   # Sanitizers
   if(MSVC)
     option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined sanitizer" OFF)
@@ -65,5 +68,7 @@ macro(setup_options)
   option(ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
   option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
   option(ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
+
+  # set(CMAKE_LINKER_TYPE "LLD") # requires cmake 3.29
 
 endmacro()

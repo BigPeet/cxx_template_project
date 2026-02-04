@@ -1,5 +1,6 @@
 function(print_options)
   message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+  message(STATUS "Enable LTO: ${ENABLE_LTO}")
   message(STATUS "Developer Mode: ${DEV_MODE}")
   message(STATUS "Enable Tests: ${ENABLE_TESTS}")
   message(STATUS "Enable Sanitizers: ${ENABLE_SANITIZERS}")
@@ -48,15 +49,18 @@ macro(setup_options)
     set(IS_RELEASE_BUILD 0)
   endif()
 
-  # If build type is a release build, then disable logging prefix by default.
+  # Set options based on build type
+  # - Logging
+  # - LTO
   if(${IS_RELEASE_BUILD})
     option(LOGGING_NO_PREFIX "Log without file prefix" ON)
+    option(ENABLE_LTO "Enable/Disable Link Time Optimization" ON)
   else()
     option(LOGGING_NO_PREFIX "Log with file prefix" OFF)
+    option(ENABLE_LTO "Enable/Disable Link Time Optimization" OFF)
   endif()
 
-  # Link Time Optimization
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${IS_RELEASE_BUILD})
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
 
   # Sanitizers
   if(MSVC)

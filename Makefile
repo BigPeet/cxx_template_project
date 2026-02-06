@@ -45,8 +45,8 @@ TEST_DIR ?= tests## Test source directory
 BINDINGS_DIR ?= ## Language bindings source directory
 
 # Default clang-format/-tidy binaries/wrappers
-CLANG_FORMAT ?= clang-format-18## clang-format binary or wrapper
-CLANG_TIDY ?= run-clang-tidy-18## clang-tidy binary or wrapper
+CLANG_FORMAT ?= clang-format-20## clang-format binary or wrapper
+CLANG_TIDY ?= run-clang-tidy-20## clang-tidy binary or wrapper
 
 # Arguments for running executable
 ARGS ?= ## Arguments to pass when running the application
